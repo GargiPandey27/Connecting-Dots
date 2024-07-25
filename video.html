@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Sharing Platform</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <header class="bg-info text-white py-4 me-2">
+        <h1 class="text-center">Videos??</h1>
+      </header>
+    <div class="container mt-5">
+        
+        <!-- Video Upload Section -->
+        <div id="upload-section" class="text-center">
+            <h2>Upload a Video</h2>
+            <div class="custom-file mb-3">
+                <input type="file" class="custom-file-input" id="video-upload" accept="video/*">
+                <label class="custom-file-label" for="video-upload">Choose file</label>
+            </div>
+            <button id="upload-video" class="btn btn-primary">Upload Video</button>
+        </div>
+        
+        <!-- Video Recording Section -->
+        <div id="record-section" class="mt-5 text-center">
+            <h2>Record a Video</h2>
+            <video id="recorded-video" class="w-100 mb-3" controls></video>
+            <div class="d-flex justify-content-center">
+                <button id="start-record" class="btn btn-primary mr-2">Start Recording</button>
+                <button id="stop-record" class="btn btn-danger" disabled>Stop Recording</button>
+                <button id="save-recorded" class="btn btn-success ml-2" disabled>Save Video</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const recordedVideo = document.getElementById('recorded-video');
+            const startRecordBtn = document.getElementById('start-record');
+            const stopRecordBtn = document.getElementById('stop-record');
+            const saveRecordedBtn = document.getElementById('save-recorded');
+            
+            const videoUploadInput = document.getElementById('video-upload');
+            const uploadVideoBtn = document.getElementById('upload-video');
+        
+            let mediaRecorder;
+            let recordedChunks = [];
+        
+            // Video Recording
+            startRecordBtn.addEventListener('click', async () => {
+                recordedChunks = [];
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+        
+                mediaRecorder.ondataavailable = event => {
+                    if (event.data.size > 0) {
+                        recordedChunks.push(event.data);
+                    }
+                };
+        
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                    recordedVideo.src = URL.createObjectURL(blob);
+                    saveRecordedBtn.disabled = false;
+                };
+        
+                mediaRecorder.start();
+                startRecordBtn.disabled = true;
+                stopRecordBtn.disabled = false;
+            });
+        
+            stopRecordBtn.addEventListener('click', () => {
+                mediaRecorder.stop();
+                startRecordBtn.disabled = false;
+                stopRecordBtn.disabled = true;
+            });
+        
+            saveRecordedBtn.addEventListener('click', () => {
+                // I have to write code to save the video somewhere
+        
+                // Reset UI
+                recordedVideo.src = '';
+                saveRecordedBtn.disabled = true;
+            });
+        
+            // Video Upload
+            uploadVideoBtn.addEventListener('click', () => {
+                const file = videoUploadInput.files[0];
+                if (file) {
+                    //  I have to write code to upload the video somewhere
+        
+                    // Reset UI
+                    videoUploadInput.value = '';
+                    document.querySelector('.custom-file-label').textContent = 'Choose file';
+                }
+            });
+
+            videoUploadInput.addEventListener('change', () => {
+                const fileName = videoUploadInput.files[0].name;
+                document.querySelector('.custom-file-label').textContent = fileName;
+            });
+        });
+    </script>
+</body>
+</html>
